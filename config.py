@@ -21,7 +21,7 @@ TWITCH_CHANNEL = os.getenv("TWITCH_CHANNEL")
 if not TWITCH_TOKEN or not TWITCH_NICK or not TWITCH_CHANNEL:
     raise SystemExit("❌ Manque TWITCH_TOKEN / TWITCH_NICK / TWITCH_CHANNEL dans .env")
 
-
+# test
 # ══════════════════════════════════════════════════════════════════════════════
 #                              DISCORD
 # ══════════════════════════════════════════════════════════════════════════════
