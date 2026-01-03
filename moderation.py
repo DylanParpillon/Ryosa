@@ -4,6 +4,7 @@ Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
 """
 
 import time
+import asyncio
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict, deque
 from config import (
@@ -134,12 +135,12 @@ class Moderator:
         
         if action == "warn":
             await message.channel.send(f"@{author} ⚠️ Avertissement ({reason}). Prochaine fois : Timeout.")
-            await self._log(f"⚠️ WARN | @{author} | {reason}")
+            self._log_background(f"⚠️ WARN | @{author} | {reason}")
             
         elif action == "timeout":
             if SAFE_MODE:
                 await message.channel.send(f"@{author} [SAFE_MODE] Simulation Timeout {duration}s ({reason})")
-                await self._log(f"🚫 [SAFE MODE] TIMEOUT {duration}s | @{author} | {reason}")
+                self._log_background(f"🚫 [SAFE MODE] TIMEOUT {duration}s | @{author} | {reason}")
             else:
                 try:
                     # TwitchIO v2.10: ctx.timeout ou utiliser channel.timeout ?
@@ -149,7 +150,7 @@ class Moderator:
                     # Le plus simple en message context : /timeout
                     await message.channel.send(f"/timeout {author} {duration} {reason}")
                     await message.channel.send(f"@{author} 🔇 Timeout {duration}s ({reason})")
-                    await self._log(f"🔇 TIMEOUT {duration}s | @{author} | {reason}")
+                    self._log_background(f"🔇 TIMEOUT {duration}s | @{author} | {reason}")
                 except Exception as e:
                     print(f"[MOD] Timeout error: {e}")
 
@@ -160,10 +161,10 @@ class Moderator:
         """Applique un ban définitif (ou simule)."""
         if SAFE_MODE:
             await message.channel.send(f"@{author} [SAFE_MODE] Simulation BAN ({reason})")
-            await self._log(f"🚨 [SAFE MODE] BAN | @{author} | {reason}")
+            self._log_background(f"🚨 [SAFE MODE] BAN | @{author} | {reason}")
         else:
             await message.channel.send(f"/ban {author} {reason}")
-            await self._log(f"🚨 BAN | @{author} | {reason}")
+            self._log_background(f"🚨 BAN | @{author} | {reason}")
 
     async def _check_flood(self, message, author: str, content: str) -> bool:
         """Vérifie le flood."""
@@ -206,6 +207,10 @@ class Moderator:
             return True
         return False
 
+    def _log_background(self, text: str):
+        """Lance le log en arrière-plan pour ne pas bloquer."""
+        asyncio.create_task(self._log(text))
+
     async def _log(self, text: str):
         """Envoie un log dans le webhook Discord."""
         if not DISCORD_WEBHOOK_URL:
@@ -213,10 +218,12 @@ class Moderator:
         
         session = getattr(self.bot, "http_session", None)
         if not session:
-            print("[LOG] Pas de session HTTP disponible pour le log Discord.")
+            # print("[LOG] Pas de session HTTP disponible pour le log Discord.")
             return
 
         try:
-            await session.post(DISCORD_WEBHOOK_URL, json={"content": text})
+            # On ajoute un timeout spécifique court pour les logs
+            async with session.post(DISCORD_WEBHOOK_URL, json={"content": text}, timeout=5) as resp:
+                pass
         except Exception as e:
             print(f"[LOG] Erreur: {e}")

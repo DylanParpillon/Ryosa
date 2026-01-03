@@ -97,7 +97,9 @@ class StreamAnnouncer:
                 "content": text,
                 "allowed_mentions": {"parse": ["roles"]}
             }
-            await session.post(DISCORD_ANNOUNCE_URL, json=payload)
+            # Timeout court pour les annonces
+            async with session.post(DISCORD_ANNOUNCE_URL, json=payload, timeout=5) as resp:
+                pass
             print("[ANNOUNCE] ✅ Annonce envoyée !")
         except Exception as e:
             print(f"[ANNOUNCE] ❌ Erreur: {e}")

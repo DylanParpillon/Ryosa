@@ -97,13 +97,14 @@ BANNED_WORDS_REGEX = re.compile(r"|".join(re.escape(w) for w in BANNED_WORDS), r
 #                          MODERATION V2 (SCAM & ESCALADE)
 # ══════════════════════════════════════════════════════════════════════════════
 
-SAFE_MODE = True  # True = Pas de ban/timeout réel, juste des logs
+SAFE_MODE = False  # False = Ban réel activé !
 
 # Mots-clés SCAM (déclenchent un BAN si lien ou compte récent)
 SCAM_KEYWORDS = [
     "buy viewers", "big follows", "cheap viewers", "best viewers",
     "fame", "followers", "promotion", "twitch services", "best prices",
-    "streamboo", "remove the space"
+    "streamboo", "remove the space", "doge", "viewers for cheap",
+    "viewers on", "follows on", "prices on", "quality viewers"
 ]
 SCAM_REGEX = re.compile(r"|".join(re.escape(w) for w in SCAM_KEYWORDS), re.IGNORECASE)
 

@@ -66,7 +66,10 @@ class TokenManager:
 
     async def refresh(self, session: aiohttp.ClientSession) -> bool:
         """Tente de rafraîchir le token."""
-        print("🔄 Refresh du token Twitch...")
+        print(f"🔄 Refresh du token Twitch...")
+        print(f"   ℹ️ Client ID: {self.client_id}")
+        print(f"   ℹ️ Refresh Token (début): {self.refresh_token[:5]}..." if self.refresh_token else "   ⚠️ Refresh Token: NON DÉFINI")
+        
         url = "https://id.twitch.tv/oauth2/token"
         params = {
             "grant_type": "refresh_token",
@@ -122,7 +125,9 @@ class Bot(commands.Bot):
         print(f"✅ Connecté en tant que {self.nick} | sur #{TWITCH_CHANNEL}")
         
         if self.http_session is None:
-            self.http_session = aiohttp.ClientSession()
+            # Timeout global de 10s pour éviter de bloquer sur des webhooks lents
+            timeout = aiohttp.ClientTimeout(total=10)
+            self.http_session = aiohttp.ClientSession(timeout=timeout)
             # On injecte la session dans le bot.http pour compatibilité si besoin, 
             # mais TwitchIO gère son propre http interne pour command handling.
             # Ici on utilise self.http_session pour nos appels API custom.
