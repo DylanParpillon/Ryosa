@@ -82,3 +82,29 @@ LINK_WHITELIST = [
 # Mots interdits
 BANNED_WORDS = ["viagra", "crypto", "follow4follow"]
 BANNED_WORDS_REGEX = re.compile(r"|".join(re.escape(w) for w in BANNED_WORDS), re.IGNORECASE)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#                          MODERATION V2 (SCAM & ESCALADE)
+# ══════════════════════════════════════════════════════════════════════════════
+
+SAFE_MODE = True  # True = Pas de ban/timeout réel, juste des logs
+
+# Mots-clés SCAM (déclenchent un BAN si lien ou compte récent)
+SCAM_KEYWORDS = [
+    "buy viewers", "big follows", "cheap viewers", "best viewers",
+    "fame", "followers", "promotion", "twitch services", "best prices"
+]
+SCAM_REGEX = re.compile(r"|".join(re.escape(w) for w in SCAM_KEYWORDS), re.IGNORECASE)
+
+# Seuil d'âge du compte pour être considéré comme "suspect" (jours)
+ACCOUNT_AGE_THRESHOLD_DAYS = 7
+
+# Système d'escalade des sanctions
+# level 0 = 1er avertissement, level 1 = 2eme, etc.
+WARNING_LEVELS = [
+    {"action": "warn", "duration": 0},          # 1ère offense : Warning verbal
+    {"action": "timeout", "duration": 60},      # 2ème : Timeout 1 min
+    {"action": "timeout", "duration": 600},     # 3ème : Timeout 10 min
+    {"action": "ban", "duration": 0}            # 4ème : Ban
+]
