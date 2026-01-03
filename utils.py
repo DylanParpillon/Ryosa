@@ -1,5 +1,6 @@
 """
 Fonctions utilitaires pour le bot RyosaChii
+Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
 """
 
 import re

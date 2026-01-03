@@ -1,5 +1,6 @@
 """
 Module de modération du chat Twitch
+Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
 """
 
 import time
@@ -207,9 +208,15 @@ class Moderator:
 
     async def _log(self, text: str):
         """Envoie un log dans le webhook Discord."""
-        if not DISCORD_WEBHOOK_URL or not self.bot.http:
+        if not DISCORD_WEBHOOK_URL:
             return
+        
+        session = getattr(self.bot, "http_session", None)
+        if not session:
+            print("[LOG] Pas de session HTTP disponible pour le log Discord.")
+            return
+
         try:
-            await self.bot.http.post(DISCORD_WEBHOOK_URL, json={"content": text})
+            await session.post(DISCORD_WEBHOOK_URL, json={"content": text})
         except Exception as e:
             print(f"[LOG] Erreur: {e}")

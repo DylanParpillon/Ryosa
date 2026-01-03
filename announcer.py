@@ -1,5 +1,6 @@
 """
 Module d'annonces Discord pour les streams
+Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
 """
 
 import asyncio
@@ -80,15 +81,23 @@ class StreamAnnouncer:
 
     async def _send_announce(self, text: str):
         """Envoie une annonce Discord."""
-        if not DISCORD_ANNOUNCE_URL or not self.bot.http:
+    async def _send_announce(self, text: str):
+        """Envoie une annonce Discord."""
+        if not DISCORD_ANNOUNCE_URL:
             print("[ANNOUNCE] Webhook non configuré")
             return
+            
+        session = getattr(self.bot, "http_session", None)
+        if not session:
+            print("[ANNOUNCE] Pas de session HTTP")
+            return
+
         try:
             payload = {
                 "content": text,
                 "allowed_mentions": {"parse": ["roles"]}
             }
-            await self.bot.http.post(DISCORD_ANNOUNCE_URL, json=payload)
+            await session.post(DISCORD_ANNOUNCE_URL, json=payload)
             print("[ANNOUNCE] ✅ Annonce envoyée !")
         except Exception as e:
             print(f"[ANNOUNCE] ❌ Erreur: {e}")

@@ -1,11 +1,14 @@
 """
 RyosaChii Bot - Bot Twitch de modération + annonces Discord
+Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
+
 TwitchIO v2.10.0 | Python 3.13
 
 Structure:
   - config.py      : Configuration (variables, regex, messages)
   - utils.py       : Fonctions utilitaires
   - announcer.py   : Annonces Discord des streams
+  - chat_alerts.py : Messages automatiques dans le chat
   - moderation.py  : Modération du chat
   - bot.py         : Point d'entrée principal
 """
@@ -134,15 +137,9 @@ class Bot(commands.Bot):
             except Exception as e:
                 print(f"⚠️ Impossible de récupérer broadcaster_id: {e}")
 
-        # Hack: Injecter notre session dans announcer/moderator si besoin
-        # Moderator utilise self.bot.http qui est celui de TwitchIO normalement,
-        # mais on peut lui donner accès à notre session custom si on veut normaliser.
-        # Pour l'instant on laisse Moderator utiliser bot.http (TwitchIO internal) ou on patch bot.http ?
-        # TwitchIO Bot.http est un module interne, pas une aiohttp.Session directe.
-        # Moderator.log utilise self.bot.http.post... attendez, TwitchIO http n'a pas de post() public direct comme aiohttp.
-        # Correction: Moderator utilisait self.bot.http qui, dans le code original, était initialisé à aiohttp.ClientSession dans event_ready.
-        # Donc on garde cette logique.
-        self.http = self.http_session 
+        # Correction: On N'ecrase PLUS self.http.
+        # TwitchIO utilise self.http pour ses propres trucs interne.
+        # On utilise self.http_session pour NOS webhooks.
         
         await self.announcer.start()
         await self.alerter.start()
@@ -154,10 +151,15 @@ class Bot(commands.Bot):
         if self.moderator:
             await self.moderator._log("🔴 **RyosaChii Arrêtée**")
         
+        # D'abord on coupe les services annexes
         await self.announcer.stop()
         await self.alerter.stop()
+        
+        # Ensuite on ferme la session
         if self.http_session:
             await self.http_session.close()
+        
+        # Enfin on ferme le bot (qui nettoie aussi ses trucs)
         await super().close()
 
     # ─────────────────────────── EVENTS ───────────────────────────
@@ -266,13 +268,15 @@ class Bot(commands.Bot):
             err_msg = str(e)
             if "broadcaster is not live" in err_msg.lower():
                 await ctx.send("❌ Impossible de clipper : Le stream ne semble pas en ligne.")
+                await self.moderator._log(f"⚠️ CLIP FAILED | @{ctx.author.name} | Stream offline")
             elif "scopts" in err_msg.lower() or "permission" in err_msg.lower():
                 await ctx.send("❌ Erreur permissions (scope manquant pour clips).")
-                await self.moderator._log(f"⚠️ CLIP ERROR | {e}")
+                await self.moderator._log(f"⚠️ CLIP ERROR | @{ctx.author.name} | Permissions/Scope missing: {e}")
             else:
                 print(f"❌ Erreur Clip: {e}")
                 # On évite de spammer le chat avec l'erreur technique précise
                 await ctx.send("❌ Erreur lors de la création du clip.") 
+                await self.moderator._log(f"❌ CLIP ERROR | @{ctx.author.name} | {err_msg}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

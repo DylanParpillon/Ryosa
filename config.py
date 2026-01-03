@@ -1,5 +1,7 @@
 """
 Configuration du bot RyosaChii
+Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
+
 Toutes les variables de configuration centralisées ici
 """
 

@@ -1,5 +1,6 @@
 """
 Module d'alertes automatiques dans le chat Twitch
+Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
 """
 
 import asyncio

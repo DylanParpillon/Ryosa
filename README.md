@@ -1,6 +1,7 @@
 # 🤖 RyosaChii Bot
 
-Bot Twitch de modération + annonces Discord automatiques.
+Bot Twitch de modération + annonces Discord automatiques + Clips + Alertes.
+Développé par **Tosachii et LaCabaneVirtuelle**.
 
 ## ✨ Fonctionnalités
 
@@ -10,21 +11,28 @@ Bot Twitch de modération + annonces Discord automatiques.
   - Affiche la catégorie et le titre du stream
 
 - **Modération Chat** :
-  - Anti-flood (max 5 messages / 7 secondes)
-  - Anti-liens (avec whitelist configurable)
-  - Filtre de mots interdits
-  - Logs vers Discord
+  - **Anti-flood** : Limite messages rapides (configurable)
+  - **Anti-liens** : Bloque les liens non whitelistés (+ détection liens cachés)
+  - **Anti-scam** : Bloque les bots connus (streamboo, etc.) et les mots-clés d'arnaque
+  - **Logs Discord** : Remonte toutes les actions de modération + Succès/Echecs de Clips + Démarrage/Arrêt du bot
+
+- **Commandes** :
+  - `!clip` : Crée un clip instantané, crédite l'utilisateur dans le chat, log le résultat sur Discord.
+
+- **Auto-Messages** :
+  - Poste automatiquement un message (ex: lien Discord) toutes les 5 minutes si le chat est actif.
 
 ## 📁 Structure
 
 ```
 Ryosa/
-├── .env              # Variables d'environnement (secrets)
-├── bot.py            # Point d'entrée
-├── config.py         # Configuration (messages, limites)
-├── utils.py          # Fonctions utilitaires
-├── announcer.py      # Annonces Discord
-└── moderation.py     # Modération chat
+├── .env              # Secrets (Token, IDs)
+├── bot.py            # Point d'entrée principal
+├── config.py         # Configuration générale
+├── announcer.py      # Module Annonces Stream
+├── chat_alerts.py    # Module Messages Autos Chat
+├── moderation.py     # Module Modération & Logs
+└── utils.py          # Fonctions utilitaires
 ```
 
 ## 🚀 Installation
@@ -33,41 +41,29 @@ Ryosa/
 # Créer l'environnement virtuel
 python -m venv .venv
 .\.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # Linux
 
 # Installer les dépendances
-pip install twitchio==2.10.0 python-dotenv aiohttp
+pip install -r requirements.txt
 ```
 
 ## ⚙️ Configuration
 
-Créer un fichier `.env` :
+Remplir le fichier `.env` :
 
 ```env
-TWITCH_NICK=RyosaChii
-TWITCH_CHANNEL=lacabanevirtuelle
+TWITCH_NICK=[Compte bot Name]
+TWITCH_CHANNEL=[Channel Name]
 TWITCH_TOKEN=oauth:xxxxxxxxxxxxxxx
+TWITCH_CLIENT_ID=...
+TWITCH_CLIENT_SECRET=...
+TWITCH_REFRESH_TOKEN=...
 
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...  # Logs modération
-DISCORD_ANNOUNCE_URL=https://discord.com/api/webhooks/... # Annonces stream
-DISCORD_ROLE_ID=123456789012345678                        # ID du rôle @Membre
+DISCORD_WEBHOOK_URL=...      # Pour les logs modération/système
+DISCORD_ANNOUNCE_URL=...     # Pour les annonces live
+DISCORD_ROLE_ID=...          # ID du rôle à ping
 ```
-
-## 🎮 Lancement
-
-```bash
-python bot.py
-```
-
-## 📝 Personnalisation
-
-Modifier `config.py` pour :
-- **Messages d'annonce** : lignes 42-47
-- **URL du stream** : ligne 38
-- **Limites anti-flood** : lignes 59-60
-- **Mots interdits** : ligne 83
-- **Whitelist liens** : lignes 76-79
 
 ## 📜 Licence
 
-Projet privé - LaCabaneVirtuelle
+Copyright © 2024 **Tosachii et LaCabaneVirtuelle**.
+Projet privé. Toute reproduction interdite sans autorisation.
