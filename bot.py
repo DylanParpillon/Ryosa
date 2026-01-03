@@ -66,10 +66,7 @@ class TokenManager:
 
     async def refresh(self, session: aiohttp.ClientSession) -> bool:
         """Tente de rafraîchir le token."""
-        print(f"🔄 Refresh du token Twitch...")
-        print(f"   ℹ️ Client ID: {self.client_id}")
-        print(f"   ℹ️ Refresh Token (début): {self.refresh_token[:5]}..." if self.refresh_token else "   ⚠️ Refresh Token: NON DÉFINI")
-        
+        print("🔄 Refresh du token Twitch...")
         url = "https://id.twitch.tv/oauth2/token"
         params = {
             "grant_type": "refresh_token",
