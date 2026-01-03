@@ -100,9 +100,17 @@ SAFE_MODE = True  # True = Pas de ban/timeout réel, juste des logs
 # Mots-clés SCAM (déclenchent un BAN si lien ou compte récent)
 SCAM_KEYWORDS = [
     "buy viewers", "big follows", "cheap viewers", "best viewers",
-    "fame", "followers", "promotion", "twitch services", "best prices"
+    "fame", "followers", "promotion", "twitch services", "best prices",
+    "streamboo", "remove the space"
 ]
 SCAM_REGEX = re.compile(r"|".join(re.escape(w) for w in SCAM_KEYWORDS), re.IGNORECASE)
+
+# Regex pour détecter les liens "cachés" (ex: streamboo .com, discord .gg)
+LINK_OBFUSCATION_REGEX = re.compile(
+    r"\w+\s+\.(?:com|fr|tv|gg|net|org|io)|"  # domaine .com
+    r"\(remove the space\)",                  # phrase typique
+    re.IGNORECASE
+)
 
 # Seuil d'âge du compte pour être considéré comme "suspect" (jours)
 ACCOUNT_AGE_THRESHOLD_DAYS = 7
@@ -115,3 +123,12 @@ WARNING_LEVELS = [
     {"action": "timeout", "duration": 600},     # 3ème : Timeout 10 min
     {"action": "ban", "duration": 0}            # 4ème : Ban
 ]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+#                          AUTO MESSAGES (CHAT)
+# ══════════════════════════════════════════════════════════════════════════════
+
+AUTO_MSG_INTERVAL = 300  # 5 minutes en secondes
+AUTO_MSG_THRESHOLD = 5   # Nombre de messages min. entre deux alertes
+AUTO_MSG_TEXT = "📢 Rejoignez notre Discord : https://discord.gg/WjBfgXmEdU !\n\n📢 Le planning, les actus et si tu veux trouver des mates tout est dessus !!!"

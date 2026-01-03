@@ -25,6 +25,7 @@ from config import (
 )
 from announcer import StreamAnnouncer
 from moderation import Moderator
+from chat_alerts import ChatAlerter
 
 
 class TokenManager:
@@ -108,6 +109,7 @@ class Bot(commands.Bot):
         self.tokens = TokenManager()
         self.announcer = StreamAnnouncer(self)
         self.moderator = Moderator(self)
+        self.alerter = ChatAlerter(self)
         self.broadcaster_id: str | None = None
 
     # ─────────────────────────── LIFECYCLE ───────────────────────────
@@ -143,6 +145,7 @@ class Bot(commands.Bot):
         self.http = self.http_session 
         
         await self.announcer.start()
+        await self.alerter.start()
         await self.moderator._log("🟢 **RyosaChii Démarrée** | Prête à modérer !")
 
     async def close(self):
@@ -152,6 +155,7 @@ class Bot(commands.Bot):
             await self.moderator._log("🔴 **RyosaChii Arrêtée**")
         
         await self.announcer.stop()
+        await self.alerter.stop()
         if self.http_session:
             await self.http_session.close()
         await super().close()
@@ -163,6 +167,9 @@ class Bot(commands.Bot):
         if message.echo:
             return
         
+        # Compteur pour alertes auto
+        self.alerter.on_message()
+
         # Modération (si bloqué, on arrête)
         if await self.moderator.check_message(message):
             return
@@ -252,7 +259,7 @@ class Bot(commands.Bot):
                     pass
             
             final_url = found_url or clip_url
-            await ctx.send(f"🎬 Clip créé ! {final_url}")
+            await ctx.send(f"🎬 @{ctx.author.name} vient de créer le clip ! {final_url}")
             await self.moderator._log(f"🎬 CLIP | Créé par @{ctx.author.name} | {final_url}")
 
         except Exception as e:

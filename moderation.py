@@ -7,8 +7,10 @@ from datetime import datetime, timezone, timedelta
 from collections import defaultdict, deque
 from config import (
     DISCORD_WEBHOOK_URL, FLOOD_MAX_MSG, FLOOD_WINDOW_S,
+    DISCORD_WEBHOOK_URL, FLOOD_MAX_MSG, FLOOD_WINDOW_S,
     LINK_REGEX, BANNED_WORDS_REGEX,
-    SAFE_MODE, SCAM_REGEX, ACCOUNT_AGE_THRESHOLD_DAYS, WARNING_LEVELS
+    SAFE_MODE, SCAM_REGEX, ACCOUNT_AGE_THRESHOLD_DAYS, WARNING_LEVELS,
+    LINK_OBFUSCATION_REGEX
 )
 from utils import is_link_whitelisted
 
@@ -36,6 +38,10 @@ class Moderator:
         """
         author = message.author.name if message.author else "unknown"
         content = message.content or ""
+
+        # Ignore les modérateurs et le broadcaster
+        if message.author and (message.author.is_mod or message.author.is_broadcaster):
+            return False
         
         if await self._check_scam(message, author, content):
             return True
@@ -60,16 +66,24 @@ class Moderator:
 
     async def _check_scam(self, message, author: str, content: str) -> bool:
         """Détection heuristique de scam/bot."""
-        # Critère 1: Lien + Mot clé scam
+        # Critère 1: Lien (ou lien caché) + Mot clé scam
         has_link = bool(LINK_REGEX.search(content))
+        has_obfuscated_link = bool(LINK_OBFUSCATION_REGEX.search(content))
         has_scam_keyword = bool(SCAM_REGEX.search(content))
 
-        if has_link and has_scam_keyword:
-            await self._apply_ban(message, author, "SCAM DETECTED (Lien + Mot clé)")
+        # Si mot clé "streamboo" ou "remove the space" -> on considère que c'est un lien caché implicite
+        # Ou si lien détecté + mot clé
+        if (has_link or has_obfuscated_link) and has_scam_keyword:
+            await self._apply_ban(message, author, "SCAM DETECTED (Lien/Obfuscation + Mot clé)")
             return True
         
-        # Critère 2: Lien + Compte très récent (si on peut vérifier)
-        if has_link:
+        # Cas spécial : Mot clé très fort seul (ex: streamboo) -> BAN DIRECT
+        if "streamboo" in content.lower():
+             await self._apply_ban(message, author, "SCAM DETECTED (Blacklisted Domain)")
+             return True
+        
+        # Critère 2: Lien (ou lien caché) + Compte très récent
+        if has_link or has_obfuscated_link:
             is_new_account = await self._is_account_recent(author)
             if is_new_account:
                 await self._apply_ban(message, author, f"SCAM DETECTED (Lien + Compte < {ACCOUNT_AGE_THRESHOLD_DAYS}j)")
