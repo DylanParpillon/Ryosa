@@ -21,6 +21,13 @@ TWITCH_CHANNEL = os.getenv("TWITCH_CHANNEL")
 if not TWITCH_TOKEN or not TWITCH_NICK or not TWITCH_CHANNEL:
     raise SystemExit("❌ Manque TWITCH_TOKEN / TWITCH_NICK / TWITCH_CHANNEL dans .env")
 
+TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
+TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
+TWITCH_REFRESH_TOKEN = os.getenv("TWITCH_REFRESH_TOKEN")
+
+# Fichier de persistance des tokens
+TOKEN_STORE_FILE = "token_store.json"
+
 # test
 # ══════════════════════════════════════════════════════════════════════════════
 #                              DISCORD
