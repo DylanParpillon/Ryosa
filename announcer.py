@@ -81,8 +81,6 @@ class StreamAnnouncer:
 
     async def _send_announce(self, text: str):
         """Envoie une annonce Discord."""
-    async def _send_announce(self, text: str):
-        """Envoie une annonce Discord."""
         if not DISCORD_ANNOUNCE_URL:
             print("[ANNOUNCE] Webhook non configuré")
             return

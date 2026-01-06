@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RyosaChii Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #a970ff;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #333;
+            color: #fff;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #a970ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #9146ff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+
+        th {
+            background-color: #333;
+        }
+
+        .delete-btn {
+            background-color: #ff4d4d;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .delete-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🤖 RyosaChii Dashboard</h1>
+
+        <div class="form-group">
+            <h3>Ajouter une commande</h3>
+            <form id="addForm">
+                <input type="text" id="cmdName" placeholder="Nom (ex: !discord)" required>
+                <br><br>
+                <textarea id="cmdResponse" placeholder="Réponse du bot..." required></textarea>
+                <br><br>
+                <button type="submit">Ajouter</button>
+            </form>
+        </div>
+
+        <h3>Commandes existantes</h3>
+        <table id="cmdTable">
+            <thead>
+                <tr>
+                    <th>Commande</th>
+                    <th>Réponse</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rempli par JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadCommands() {
+            const response = await fetch('/api/commands');
+            const commands = await response.json();
+            const tbody = document.querySelector('#cmdTable tbody');
+            tbody.innerHTML = '';
+
+            for (const [name, resp] of Object.entries(commands)) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${name}</strong></td>
+                    <td>${resp}</td>
+                    <td><button class="delete-btn" onclick="deleteCommand('${name}')">Supprimer</button></td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        async function addCommand(e) {
+            e.preventDefault();
+            const name = document.getElementById('cmdName').value;
+            const response = document.getElementById('cmdResponse').value;
+
+            await fetch('/api/commands', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, response })
+            });
+
+            document.getElementById('addForm').reset();
+            loadCommands();
+        }
+
+        async function deleteCommand(name) {
+            if (!confirm(`Supprimer ${name} ?`)) return;
+
+            await fetch('/api/commands', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            loadCommands();
+        }
+
+        document.getElementById('addForm').onsubmit = addCommand;
+        loadCommands();
+    </script>
+</body>
+
+</html>

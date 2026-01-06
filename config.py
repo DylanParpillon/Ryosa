@@ -25,6 +25,7 @@ if not TWITCH_TOKEN or not TWITCH_NICK or not TWITCH_CHANNEL:
 
 TWITCH_CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
 TWITCH_CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
+TWITCH_BOT_ID = os.getenv("TWITCH_BOT_ID")
 TWITCH_REFRESH_TOKEN = os.getenv("TWITCH_REFRESH_TOKEN")
 
 # Fichier de persistance des tokens
