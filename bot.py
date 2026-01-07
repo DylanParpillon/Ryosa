@@ -14,7 +14,7 @@ Structure:
 import aiohttp
 from twitchio.ext import commands
 
-from config import TWITCH_TOKEN, TWITCH_CHANNEL, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID
+from config import TWITCH_TOKEN, TWITCH_CHANNEL, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, TWITCH_NICK
 from announcer import StreamAnnouncer
 from moderation import Moderator
 from dashboard import Dashboard
@@ -26,10 +26,13 @@ class Bot(commands.Bot):
     def __init__(self):
         super().__init__(
             token=TWITCH_TOKEN,
+            client_id=TWITCH_CLIENT_ID,
+            client_secret=TWITCH_CLIENT_SECRET,
+            bot_id=TWITCH_BOT_ID,
             prefix="!",
             initial_channels=[TWITCH_CHANNEL],
         )
-        self.http: aiohttp.ClientSession | None = None
+        self.http_session: aiohttp.ClientSession | None = None
         self.announcer = StreamAnnouncer(self)
         self.moderator = Moderator(self)
         self.dashboard = Dashboard(self)  # Nouveau module Dashboard
@@ -38,10 +41,10 @@ class Bot(commands.Bot):
 
     async def event_ready(self):
         """Appelé quand le bot est connecté."""
-        print(f"✅ Connecté en tant que {self.nick} | sur #{TWITCH_CHANNEL}")
+        print(f"✅ Connecté en tant que {TWITCH_NICK} | sur #{TWITCH_CHANNEL}")
         
-        if self.http is None:
-            self.http = aiohttp.ClientSession()
+        if self.http_session is None:
+            self.http_session = aiohttp.ClientSession()
         
         await self.announcer.start()
         await self.dashboard.start()  # Démarrage du site web
@@ -50,8 +53,8 @@ class Bot(commands.Bot):
         """Fermeture propre du bot."""
         await self.announcer.stop()
         await self.dashboard.stop()
-        if self.http:
-            await self.http.close()
+        if self.http_session:
+            await self.http_session.close()
         await super().close()
 
     # ─────────────────────────── EVENTS ───────────────────────────
@@ -81,6 +84,40 @@ class Bot(commands.Bot):
     async def ping(self, ctx: commands.Context):
         """Commande !ping pour tester le bot."""
         await ctx.send("pong")
+
+    @commands.command(name="clip")
+    async def clip_command(self, ctx: commands.Context):
+        """Commande !clip pour créer un clip."""
+        try:
+            # 1. Récupérer le broadcaster
+            users = await self.fetch_users(names=[TWITCH_CHANNEL])
+            if not users:
+                await ctx.send("❌ Erreur : Diffuseur introuvable.")
+                return
+            
+            broadcaster = users[0]
+            
+            # 2. Créer le clip
+            # On utilise le token du bot configuré
+            clip = await broadcaster.create_clip(token=TWITCH_TOKEN)
+            
+            # 3. Réponse Chat
+            clip_url = f"https://clips.twitch.tv/{clip.id}"
+            await ctx.send(f"🎬 Clip créé par @{ctx.author.name} ! lien : {clip_url}")
+            
+            # 4. Log Discord
+            self.moderator._log_background(f"🎬 CLIP | Créé par @{ctx.author.name} | {clip_url}")
+
+        except Exception as e:
+            # Gestion d'erreur (ex: Stream offline)
+            err_msg = str(e)
+            if "offline" in err_msg.lower():
+                await ctx.send("❌ Impossible de créer un clip : Le stream est hors ligne.")
+            else:
+                await ctx.send(f"❌ Erreur lors de la création du clip.")
+                print(f"[CLIP] Erreur : {e}")
+            
+            self.moderator._log_background(f"❌ CLIP ERROR | @{ctx.author.name} | {e}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════

@@ -97,7 +97,10 @@ class StreamAnnouncer:
             }
             # Timeout court pour les annonces
             async with session.post(DISCORD_ANNOUNCE_URL, json=payload, timeout=5) as resp:
-                pass
-            print("[ANNOUNCE] ✅ Annonce envoyée !")
+                if 200 <= resp.status < 300:
+                    print("[ANNOUNCE] ✅ Annonce envoyée !")
+                else:
+                    text = await resp.text()
+                    print(f"[ANNOUNCE] ❌ Erreur Discord {resp.status}: {text}")
         except Exception as e:
             print(f"[ANNOUNCE] ❌ Erreur: {e}")

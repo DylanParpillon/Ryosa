@@ -224,6 +224,8 @@ class Moderator:
         try:
             # On ajoute un timeout spécifique court pour les logs
             async with session.post(DISCORD_WEBHOOK_URL, json={"content": text}, timeout=5) as resp:
-                pass
+                if not (200 <= resp.status < 300):
+                    err_text = await resp.text()
+                    print(f"[LOG] Erreur Discord {resp.status}: {err_text}")
         except Exception as e:
             print(f"[LOG] Erreur: {e}")
