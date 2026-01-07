@@ -48,12 +48,15 @@ class Bot(commands.Bot):
         
         await self.announcer.start()
         await self.dashboard.start()  # Démarrage du site web
+        self.moderator._log_background(f"✅ **Bot RyosaChii démarré** sur #{TWITCH_CHANNEL}")
 
     async def close(self):
         """Fermeture propre du bot."""
         await self.announcer.stop()
         await self.dashboard.stop()
         if self.http_session:
+            # On utilise await pour être sûr que le log part avant la fermeture
+            await self.moderator._log("🛑 **Bot RyosaChii arrêté.**")
             await self.http_session.close()
         await super().close()
 
@@ -76,6 +79,9 @@ class Bot(commands.Bot):
             return
         
         # 3. Commandes Hardcodées (!ping, etc.)
+        if message.content.startswith("!"):
+            print(f"[CMD] {message.author.name}: {message.content}")
+        
         await self.handle_commands(message)
 
     # ─────────────────────────── COMMANDES ───────────────────────────
@@ -88,6 +94,7 @@ class Bot(commands.Bot):
     @commands.command(name="clip")
     async def clip_command(self, ctx: commands.Context):
         """Commande !clip pour créer un clip."""
+        print(f"[CLIP] Création demandée par {ctx.author.name}")
         try:
             # 1. Récupérer le broadcaster
             users = await self.fetch_users(names=[TWITCH_CHANNEL])
