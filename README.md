@@ -65,5 +65,5 @@ DISCORD_ROLE_ID=...          # ID du rôle à ping
 
 ## 📜 Licence
 
-Copyright © 2024 **Tosachii et LaCabaneVirtuelle**.
+Copyright © 2026 **Tosachii et LaCabaneVirtuelle**.
 Projet privé. Toute reproduction interdite sans autorisation.

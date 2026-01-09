@@ -84,7 +84,7 @@ class Dashboard:
             'interval': config.AUTO_MSG_INTERVAL,
             'threshold': config.AUTO_MSG_THRESHOLD,
             'text': config.AUTO_MSG_TEXT,
-            'enabled': hasattr(self.bot, 'chat_alerter') and self.bot.chat_alerter._task is not None
+            'enabled': hasattr(self.bot, 'chat_alerter') and self.bot.chat_alerter._tache_boucle is not None
         })
 
     async def handle_update_alerts(self, request):

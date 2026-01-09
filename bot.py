@@ -72,7 +72,7 @@ class Bot(commands.Bot):
             return
         
         # Compteur pour alertes auto
-        self.chat_alerter.on_message()
+        self.chat_alerter.compter_message()
         
         # 1. Modération
         if await self.moderator.check_message(message):

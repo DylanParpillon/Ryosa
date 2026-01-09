@@ -31,7 +31,6 @@ TWITCH_REFRESH_TOKEN = os.getenv("TWITCH_REFRESH_TOKEN")
 # Fichier de persistance des tokens
 TOKEN_STORE_FILE = "token_store.json"
 
-# test
 # ══════════════════════════════════════════════════════════════════════════════
 #                              DISCORD
 # ══════════════════════════════════════════════════════════════════════════════
