@@ -18,6 +18,7 @@ from config import TWITCH_TOKEN, TWITCH_CHANNEL, TWITCH_CLIENT_ID, TWITCH_CLIENT
 from announcer import StreamAnnouncer
 from moderation import Moderator
 from dashboard import Dashboard
+from chat_alerts import ChatAlerter
 
 
 class Bot(commands.Bot):
@@ -36,6 +37,7 @@ class Bot(commands.Bot):
         self.announcer = StreamAnnouncer(self)
         self.moderator = Moderator(self)
         self.dashboard = Dashboard(self)  # Nouveau module Dashboard
+        self.chat_alerter = ChatAlerter(self)  # Alertes auto chat
 
     # ─────────────────────────── LIFECYCLE ───────────────────────────
 
@@ -48,12 +50,14 @@ class Bot(commands.Bot):
         
         await self.announcer.start()
         await self.dashboard.start()  # Démarrage du site web
+        await self.chat_alerter.start()  # Démarrage alertes chat
         self.moderator._log_background(f"✅ **Bot RyosaChii démarré** sur #{TWITCH_CHANNEL}")
 
     async def close(self):
         """Fermeture propre du bot."""
         await self.announcer.stop()
         await self.dashboard.stop()
+        await self.chat_alerter.stop()
         if self.http_session:
             # On utilise await pour être sûr que le log part avant la fermeture
             await self.moderator._log("🛑 **Bot RyosaChii arrêté.**")
@@ -66,6 +70,9 @@ class Bot(commands.Bot):
         """Gère chaque message du chat."""
         if message.echo:
             return
+        
+        # Compteur pour alertes auto
+        self.chat_alerter.on_message()
         
         # 1. Modération
         if await self.moderator.check_message(message):

@@ -4,159 +4,723 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RyosaChii Dashboard</title>
+    <title>RyosaChii - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: #fff;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #2d2d2d;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0e0e0e;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
         }
 
-        h1 {
+        /* ===== SIDEBAR - MAGENTA/ROSE ===== */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: #1a0a1f;
+            border-right: 3px solid;
+            border-image: linear-gradient(to bottom, #e91e9e, #ff69b4, #c91540) 1;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px 15px;
+            border-bottom: 1px solid #ff00ff30;
+        }
+
+        .sidebar-logo {
             text-align: center;
-            color: #a970ff;
+            margin-bottom: 15px;
         }
 
+        .sidebar-logo h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #e91e9e;
+            text-shadow: 0 0 20px #e91e9e50;
+        }
+
+        .sidebar-logo small {
+            color: #ff69b480;
+            font-size: 11px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #e91e9e40;
+            background: #2a1030;
+            color: #fff;
+            font-size: 13px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #e91e9e;
+        }
+
+        .search-box input::placeholder {
+            color: #888;
+        }
+
+        /* Navigation */
+        .nav-section {
+            padding: 15px 10px;
+        }
+
+        .nav-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin: 15px 0 8px 5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 3px;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-item:hover {
+            background: #e91e9e20;
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: #e91e9e;
+            color: #fff;
+        }
+
+        .nav-item span {
+            font-size: 16px;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: #c91540;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* ===== MAIN - ROUGE/BLANC ===== */
+        .main {
+            flex: 1;
+            margin-left: 240px;
+            background: linear-gradient(135deg, #0e0e0e 0%, #1a0a0a 100%);
+        }
+
+        .header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #c9154020;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 1.4rem;
+            color: #fff;
+        }
+
+        .header h2 span {
+            color: #c91540;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-pink {
+            background: #e91e9e;
+            color: #fff;
+        }
+
+        .btn-pink:hover {
+            background: #d11a8a;
+        }
+
+        .btn-red {
+            background: #c91540;
+            color: #fff;
+        }
+
+        .btn-red:hover {
+            background: #a01030;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid #444;
+            color: #ccc;
+        }
+
+        .btn-ghost:hover {
+            border-color: #888;
+            color: #fff;
+        }
+
+        /* Content */
+        .content {
+            padding: 25px 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: #151515;
+            border: 1px solid #252525;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: #151515;
+            border: 1px solid #252525;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #c91540;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* Forms */
         .form-group {
             margin-bottom: 15px;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
+            color: #aaa;
+            font-size: 13px;
         }
 
-        input[type="text"],
-        textarea {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            background-color: #333;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background: #1a1a1a;
             color: #fff;
-            box-sizing: border-box;
+            font-size: 14px;
+            font-family: inherit;
         }
 
-        button {
-            background-color: #a970ff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #c91540;
         }
 
-        button:hover {
-            background-color: #9146ff;
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
         }
 
-        table {
+        /* Table */
+        .table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
         }
 
-        th,
-        td {
+        .table th,
+        .table td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #252525;
         }
 
-        th {
-            background-color: #333;
+        .table th {
+            color: #888;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
         }
 
-        .delete-btn {
-            background-color: #ff4d4d;
-            padding: 5px 10px;
-            font-size: 14px;
+        .table td {
+            color: #ccc;
         }
 
-        .delete-btn:hover {
-            background-color: #cc0000;
+        .table tr:hover {
+            background: #1a1a1a;
+        }
+
+        .cmd-name {
+            color: #e91e9e;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .btn-del {
+            background: #c91540;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-del:hover {
+            background: #a01030;
+        }
+
+        /* Coming soon */
+        .soon {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .soon-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .soon h3 {
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        /* Grid pour annonces */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Empty */
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+        }
+
+        .empty span {
+            font-size: 40px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Status message */
+        .status-msg {
+            color: #4ade80;
+            margin-left: 10px;
+        }
+
+        /* Info box */
+        .info-box {
+            background: #1a1520;
+            border-left: 3px solid #e91e9e;
+            padding: 15px;
+            border-radius: 0 6px 6px 0;
+            margin-top: 10px;
+        }
+
+        .info-box p {
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #e91e9e;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .sidebar-logo h1,
+            .sidebar-logo small,
+            .search-box,
+            .nav-title,
+            .nav-item p {
+                display: none;
+            }
+
+            .nav-item {
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .main {
+                margin-left: 60px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>🤖 RyosaChii Dashboard</h1>
-
-        <div class="form-group">
-            <h3>Ajouter une commande</h3>
-            <form id="addForm">
-                <input type="text" id="cmdName" placeholder="Nom (ex: !discord)" required>
-                <br><br>
-                <textarea id="cmdResponse" placeholder="Réponse du bot..." required></textarea>
-                <br><br>
-                <button type="submit">Ajouter</button>
-            </form>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <h1>RyosaChii</h1>
+                <small>by Tosa & Ichi</small>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Rechercher..." oninput="filterNav()">
+            </div>
         </div>
 
-        <h3>Commandes existantes</h3>
-        <table id="cmdTable">
-            <thead>
-                <tr>
-                    <th>Commande</th>
-                    <th>Réponse</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rempli par JS -->
-            </tbody>
-        </table>
-    </div>
+        <nav class="nav-section">
+            <p class="nav-title">Menu</p>
+
+            <a class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+                <span>🏠</span>
+                <p>Accueil</p>
+            </a>
+
+            <a class="nav-item" data-page="commands" onclick="showPage('commands')">
+                <span>⚡</span>
+                <p>Commandes</p>
+                <span class="nav-badge" id="cmdCount">0</span>
+            </a>
+
+            <a class="nav-item" data-page="announces" onclick="showPage('announces')">
+                <span>📢</span>
+                <p>Annonces</p>
+            </a>
+
+            <p class="nav-title">Bientôt</p>
+
+            <a class="nav-item" data-page="moderation" onclick="showPage('moderation')">
+                <span>🛡️</span>
+                <p>Modération</p>
+            </a>
+
+            <a class="nav-item" data-page="settings" onclick="showPage('settings')">
+                <span>⚙️</span>
+                <p>Config</p>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <header class="header">
+            <h2 id="pageTitle">🏠 <span>Accueil</span></h2>
+            <div>
+                <button class="btn btn-ghost" onclick="refresh()">🔄 Refresh</button>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="page active">
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-val" id="totalCommands">0</div>
+                        <div class="stat-label">Commandes</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon">🟢</div>
+                        <div class="stat-val">ON</div>
+                        <div class="stat-label">Bot en ligne</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon">📺</div>
+                        <div class="stat-val">Twitch</div>
+                        <div class="stat-label">Plateforme</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">👋 Bienvenue sur le dashboard !</h3>
+                    <p style="color: #888; line-height: 1.6;">
+                        Ici tu peux gérer ton bot RyosaChii. Ajoute des commandes custom, configure les annonces Discord
+                        auto, et plus encore !
+                    </p>
+                    <div class="info-box" style="margin-top: 15px;">
+                        <p>💡 <strong>Astuce :</strong> Clique sur "Annonces" pour configurer le message Discord envoyé
+                            automatiquement dans ton chat Twitch !</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COMMANDES -->
+            <section id="commands" class="page">
+                <div class="card">
+                    <h3 class="card-title">➕ Nouvelle commande</h3>
+                    <form id="addForm">
+                        <div class="form-group">
+                            <label>Nom de la commande</label>
+                            <input type="text" id="cmdName" placeholder="!discord, !twitter..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Réponse</label>
+                            <textarea id="cmdResponse" placeholder="Le message que le bot va envoyer..."
+                                required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-pink">Ajouter</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">📋 Tes commandes</h3>
+                    <table class="table" id="cmdTable">
+                        <thead>
+                            <tr>
+                                <th>Commande</th>
+                                <th>Réponse</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div id="emptyState" class="empty" style="display: none;">
+                        <span>📭</span>
+                        <p>Aucune commande pour l'instant</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ANNONCES -->
+            <section id="announces" class="page">
+                <div class="card">
+                    <h3 class="card-title">📢 Annonces automatiques</h3>
+                    <p style="color: #888; margin-bottom: 20px;">Le bot envoie automatiquement ton message dans le chat
+                        Twitch pour promouvoir ton Discord !</p>
+
+                    <form id="alertsForm">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>⏱️ Intervalle (minutes)</label>
+                                <input type="number" id="alertInterval" min="1" max="60" value="5">
+                            </div>
+                            <div class="form-group">
+                                <label>💬 Seuil de messages</label>
+                                <input type="number" id="alertThreshold" min="1" max="100" value="5">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>📝 Message</label>
+                            <textarea id="alertText" rows="3" placeholder="Ton message d'annonce..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-red">💾 Sauvegarder</button>
+                        <span id="alertStatus" class="status-msg"></span>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">ℹ️ Comment ça marche ?</h3>
+                    <div class="info-box">
+                        <p>1. Le bot compte les messages dans ton chat</p>
+                        <p>2. Quand y'a assez de messages (<strong>seuil</strong>)...</p>
+                        <p>3. ...et que le temps (<strong>intervalle</strong>) est passé...</p>
+                        <p>4. 📢 Il envoie ton message automatiquement !</p>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-icon">⏱️</div>
+                        <div class="stat-val" id="currentInterval">5</div>
+                        <div class="stat-label">Minutes</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-val" id="currentThreshold">5</div>
+                        <div class="stat-label">Messages min</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-icon" id="alertIcon">🟢</div>
+                        <div class="stat-val" id="alertStatusText">Actif</div>
+                        <div class="stat-label">Statut</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MODÉRATION -->
+            <section id="moderation" class="page">
+                <div class="soon">
+                    <div class="soon-icon">🛡️</div>
+                    <h3>Modération</h3>
+                    <p>Bientôt dispo !</p>
+                </div>
+            </section>
+
+            <!-- CONFIG -->
+            <section id="settings" class="page">
+                <div class="soon">
+                    <div class="soon-icon">⚙️</div>
+                    <h3>Config</h3>
+                    <p>Bientôt dispo !</p>
+                </div>
+            </section>
+        </div>
+    </main>
 
     <script>
-        async function loadCommands() {
-            const response = await fetch('/api/commands');
-            const commands = await response.json();
-            const tbody = document.querySelector('#cmdTable tbody');
-            tbody.innerHTML = '';
+        const titles = {
+            'dashboard': '🏠 <span>Accueil</span>',
+            'commands': '⚡ <span>Commandes</span>',
+            'announces': '📢 <span>Annonces</span>',
+            'moderation': '🛡️ <span>Modération</span>',
+            'settings': '⚙️ <span>Config</span>'
+        };
 
-            for (const [name, resp] of Object.entries(commands)) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${name}</strong></td>
-                    <td>${resp}</td>
-                    <td><button class="delete-btn" onclick="deleteCommand('${name}')">Supprimer</button></td>
-                `;
-                tbody.appendChild(tr);
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.classList.toggle('active', n.dataset.page === id);
+            });
+
+            document.getElementById('pageTitle').innerHTML = titles[id];
+        }
+
+        function filterNav() {
+            const s = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.nav-item').forEach(n => {
+                n.style.display = n.textContent.toLowerCase().includes(s) ? 'flex' : 'none';
+            });
+        }
+
+        function refresh() {
+            loadCommands();
+            loadAlerts();
+        }
+
+        // === COMMANDES ===
+        async function loadCommands() {
+            try {
+                const r = await fetch('/api/commands');
+                const cmds = await r.json();
+                const tbody = document.querySelector('#cmdTable tbody');
+                const entries = Object.entries(cmds);
+
+                tbody.innerHTML = '';
+                document.getElementById('cmdCount').textContent = entries.length;
+                document.getElementById('totalCommands').textContent = entries.length;
+                document.getElementById('emptyState').style.display = entries.length ? 'none' : 'block';
+                document.getElementById('cmdTable').style.display = entries.length ? 'table' : 'none';
+
+                entries.forEach(([name, resp]) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><span class="cmd-name">${name}</span></td>
+                        <td>${resp}</td>
+                        <td><button class="btn-del" onclick="delCmd('${name}')">🗑️</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        async function addCommand(e) {
+        async function addCmd(e) {
             e.preventDefault();
             const name = document.getElementById('cmdName').value;
             const response = document.getElementById('cmdResponse').value;
-
             await fetch('/api/commands', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, response })
             });
-
             document.getElementById('addForm').reset();
             loadCommands();
         }
 
-        async function deleteCommand(name) {
+        async function delCmd(name) {
             if (!confirm(`Supprimer ${name} ?`)) return;
-
             await fetch('/api/commands', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
@@ -165,8 +729,49 @@
             loadCommands();
         }
 
-        document.getElementById('addForm').onsubmit = addCommand;
+        document.getElementById('addForm').onsubmit = addCmd;
+
+        // === ANNONCES ===
+        async function loadAlerts() {
+            try {
+                const r = await fetch('/api/alerts');
+                const data = await r.json();
+
+                document.getElementById('alertInterval').value = Math.round(data.interval / 60);
+                document.getElementById('alertThreshold').value = data.threshold;
+                document.getElementById('alertText').value = data.text;
+                document.getElementById('currentInterval').textContent = Math.round(data.interval / 60);
+                document.getElementById('currentThreshold').textContent = data.threshold;
+
+                document.getElementById('alertIcon').textContent = data.enabled ? '🟢' : '🔴';
+                document.getElementById('alertStatusText').textContent = data.enabled ? 'Actif' : 'Off';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function saveAlerts(e) {
+            e.preventDefault();
+            const interval = parseInt(document.getElementById('alertInterval').value) * 60;
+            const threshold = parseInt(document.getElementById('alertThreshold').value);
+            const text = document.getElementById('alertText').value;
+
+            await fetch('/api/alerts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ interval, threshold, text })
+            });
+
+            document.getElementById('alertStatus').textContent = '✅ Sauvegardé !';
+            setTimeout(() => document.getElementById('alertStatus').textContent = '', 3000);
+            loadAlerts();
+        }
+
+        document.getElementById('alertsForm').onsubmit = saveAlerts;
+
+        // Init
         loadCommands();
+        loadAlerts();
     </script>
 </body>
 

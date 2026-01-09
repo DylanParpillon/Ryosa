@@ -5,6 +5,7 @@ Serveur Web pour le Dashboard RyosaChii
 import os
 from aiohttp import web
 from custom_commands import CommandManager
+import config
 
 class Dashboard:
     def __init__(self, bot):
@@ -19,6 +20,9 @@ class Dashboard:
         self.app.router.add_get('/api/commands', self.handle_get_commands)
         self.app.router.add_post('/api/commands', self.handle_add_command)
         self.app.router.add_delete('/api/commands', self.handle_delete_command)
+        # Routes pour les alertes
+        self.app.router.add_get('/api/alerts', self.handle_get_alerts)
+        self.app.router.add_post('/api/alerts', self.handle_update_alerts)
 
     async def start(self):
         """Démarre le serveur web."""
@@ -73,3 +77,30 @@ class Dashboard:
             self.cmd_manager.remove_command(name)
             return web.json_response({'status': 'ok'})
         return web.json_response({'error': 'missing name'}, status=400)
+
+    async def handle_get_alerts(self, request):
+        """API: Récupère les paramètres d'alertes."""
+        return web.json_response({
+            'interval': config.AUTO_MSG_INTERVAL,
+            'threshold': config.AUTO_MSG_THRESHOLD,
+            'text': config.AUTO_MSG_TEXT,
+            'enabled': hasattr(self.bot, 'chat_alerter') and self.bot.chat_alerter._task is not None
+        })
+
+    async def handle_update_alerts(self, request):
+        """API: Met à jour les paramètres d'alertes."""
+        data = await request.json()
+        
+        if 'interval' in data:
+            config.AUTO_MSG_INTERVAL = int(data['interval'])
+        if 'threshold' in data:
+            config.AUTO_MSG_THRESHOLD = int(data['threshold'])
+        if 'text' in data:
+            config.AUTO_MSG_TEXT = data['text']
+        
+        # Redémarrer l'alerter avec les nouveaux params
+        if hasattr(self.bot, 'chat_alerter'):
+            await self.bot.chat_alerter.stop()
+            await self.bot.chat_alerter.start()
+        
+        return web.json_response({'status': 'ok'})
