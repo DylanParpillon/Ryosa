@@ -65,8 +65,19 @@ class StreamAnnouncer:
             
             # On récupère l'image du stream (1280x720)
             # On ajoute "?t=" avec le temps actuel pour forcer Discord à recharger l'image (cache-buster)
-            image_url = stream.thumbnail_url.format(width=1280, height=720)
-            image_url += f"?t={int(time.time())}"
+            try:
+                # TwitchIO v2.x utilise parfois .thumbnail_url ou .thumbnail
+                url_template = getattr(stream, "thumbnail_url", getattr(stream, "thumbnail", None))
+                
+                if url_template:
+                    image_url = url_template.format(width=1280, height=720)
+                    image_url += f"?t={int(time.time())}"
+                else:
+                    print(f"[DEBUG] Image introuvable. Attributs: {dir(stream)}")
+                    image_url = "https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg"
+            except Exception as e:
+                print(f"[POLL] Erreur formatage image: {e}")
+                image_url = "https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg"
             
             print(f"[LIVE] 🟢 Stream détecté ! {categorie} | {titre}")
             
@@ -74,8 +85,9 @@ class StreamAnnouncer:
             template = ANNOUNCE_MESSAGES.get(streamer, ANNOUNCE_MESSAGES["DEFAULT"])
             texte_annonce = template.format(title=clean_title(titre), category=categorie)
             
-            # Mention du rôle (doit être en dehors de l'embed pour pinger)
-            mention = f"<@&{DISCORD_ROLE_ID}> " if DISCORD_ROLE_ID else ""
+            # Mention du rôle + Petit message
+            role_ping = f"<@&{DISCORD_ROLE_ID}>" if DISCORD_ROLE_ID else "@everyone"
+            mention = f"Coucou {role_ping} ! Tosachii est en stream !!"
             
             # On prépare l'Embed (le joli encadré)
             embed = {
