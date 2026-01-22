@@ -38,6 +38,10 @@ class Bot(commands.Bot):
         self.moderator = Moderator(self)
         self.dashboard = Dashboard(self)  # Nouveau module Dashboard
         self.chat_alerter = ChatAlerter(self)  # Alertes auto chat
+        
+        # Chargement des modules externes (Cogs)
+        self.load_module("viewer_stats")
+        self.load_module("general_commands")
 
     # ─────────────────────────── LIFECYCLE ───────────────────────────
 
@@ -113,7 +117,7 @@ class Bot(commands.Bot):
             
             # 2. Créer le clip
             # Correction: Passage du token en argument nommé (TwitchIO 2.10)
-            clip = await broadcaster.create_clip(token_for=TWITCH_TOKEN)
+            clip = await broadcaster.create_clip(token=TWITCH_TOKEN)
             
             # 3. Réponse Chat
             clip_url = f"https://clips.twitch.tv/{clip.id}"

@@ -78,6 +78,18 @@ class StreamAnnouncer:
             except Exception as e:
                 print(f"[POLL] Erreur formatage image: {e}")
                 image_url = "https://static-cdn.jtvnw.net/ttv-static/404_preview-1280x720.jpg"
+
+            # On récupère l'image de la catégorie (Box Art)
+            box_art_url = ""
+            try:
+                if stream.game_id:
+                    # On fetch les infos du jeu pour avoir la box art propre
+                    games_info = await self.bot.fetch_games(ids=[int(stream.game_id)])
+                    if games_info:
+                        # Format classique Twitch : {width}x{height}
+                        box_art_url = games_info[0].box_art_url.format(width=188, height=250)
+            except Exception as e:
+                print(f"[POLL] Erreur récupération categorie: {e}")
             
             print(f"[LIVE] 🟢 Stream détecté ! {categorie} | {titre}")
             
@@ -87,7 +99,7 @@ class StreamAnnouncer:
             
             # Mention du rôle + Petit message
             role_ping = f"<@&{DISCORD_ROLE_ID}>" if DISCORD_ROLE_ID else "@everyone"
-            mention = f"Coucou {role_ping} ! Tosachii est en stream !!"
+            mention = f"Coucou {role_ping} ! ✨ Tosachii démarre son stream ! Préparez vos snacks et venez nous rejoindre, ça va être chouette ! 🌸"
             
             # On prépare l'Embed (le joli encadré)
             embed = {
@@ -95,6 +107,7 @@ class StreamAnnouncer:
                 "description": texte_annonce,
                 "color": 0x9146FF,  # Violet Twitch
                 "image": {"url": image_url},
+                "thumbnail": {"url": box_art_url} if box_art_url else {},
                 "fields": [
                     {"name": "Catégorie", "value": categorie, "inline": True},
                     {"name": "Lien", "value": f"[Regarder sur Twitch](https://twitch.tv/{TWITCH_CHANNEL})", "inline": True}

@@ -38,6 +38,8 @@ TOKEN_STORE_FILE = "token_store.json"
 DISCORD_WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK_URL")      # Logs modération
 DISCORD_ANNOUNCE_URL = os.getenv("DISCORD_ANNOUNCE_URL")    # Annonces stream
 DISCORD_ROLE_ID = os.getenv("DISCORD_ROLE_ID")              # ID du rôle @Membre
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")                  # Token du Bot Discord (Requis pour bot interactif)
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")          # ID Client Discord
 
 
 # ══════════════════════════════════════════════════════════════════════════════
