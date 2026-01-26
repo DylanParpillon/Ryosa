@@ -123,7 +123,7 @@ class Bot(commands.Bot):
         
         # 2. Commandes Personnalisées (Dashboard)
         # On vérifie si le message correspond à une commande enregistrée
-        response = self.dashboard.cmd_manager.get_response(message.content)
+        response = self.cmd_manager.get_response(message.content)
         if response:
             await message.channel.send(response)
             return
