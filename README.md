@@ -67,3 +67,25 @@ DISCORD_ROLE_ID=...          # ID du rôle à ping
 
 Copyright © 2026 **Tosachii et LaCabaneVirtuelle**.
 Projet privé. Toute reproduction interdite sans autorisation.
+
+## 🚀 Lancement (Déploiement)
+
+Le projet est maintenant séparé en deux processus distincts à lancer en parallèle sur ta VM :
+
+1. **Le Bot (Ryosa)** : Gère le chat, la modération, les clips et les annonces.
+2. **Le Dashboard** : Site web pour configurer les commandes et les alertes.
+
+### 1️⃣ Lancer le Bot
+```bash
+python run.py
+```
+_Note : `run.py` lance Ryosa (Twitch) et le module Discord s'il est configuré._
+
+### 2️⃣ Lancer le Dashboard (Site Web)
+Ouvre un **nouveau terminal** (ou utilise `screen`/`systemd`) et lance :
+```bash
+python dashboard.py
+```
+
+Les deux communiquent via les fichiers `commands.json` et `dashboard_config.json`.
+Le bot envoie un "heartbeat" (ping) sur Discord toutes les 10 minutes pour dire qu'il est en vie.

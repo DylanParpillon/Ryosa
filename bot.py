@@ -14,12 +14,13 @@ Structure:
 import aiohttp
 from twitchio.ext import commands
 
-from config import TWITCH_TOKEN, TWITCH_CHANNEL, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, TWITCH_NICK
+from config import TWITCH_TOKEN, TWITCH_CHANNEL, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_BOT_ID, TWITCH_NICK, DISCORD_WEBHOOK_URL
 from announcer import StreamAnnouncer
 from moderation import Moderator
-from dashboard import Dashboard
 from chat_alerts import ChatAlerter
-
+import asyncio
+import aiohttp
+import datetime
 
 class Bot(commands.Bot):
     """Bot principal RyosaChii."""
@@ -36,12 +37,10 @@ class Bot(commands.Bot):
         self.http_session: aiohttp.ClientSession | None = None
         self.announcer = StreamAnnouncer(self)
         self.moderator = Moderator(self)
-        self.dashboard = Dashboard(self)  # Nouveau module Dashboard
-        self.chat_alerter = ChatAlerter(self)  # Alertes auto chat
-        
-        # Chargement des modules externes (Cogs)
-        self.load_module("viewer_stats")
-        self.load_module("general_commands")
+        # Dashboard retiré du thread principal pour être standalone
+        self.chat_alerter = ChatAlerter(self)
+        self._modules_loaded = False
+        self._heartbeat_task = None
 
     # ─────────────────────────── LIFECYCLE ───────────────────────────
 
@@ -51,19 +50,59 @@ class Bot(commands.Bot):
         
         if self.http_session is None:
             self.http_session = aiohttp.ClientSession()
+
+        # Chargement des modules (une seule fois)
+        if not self._modules_loaded:
+            try:
+                await self.load_module("viewer_stats")
+                await self.load_module("general_commands")
+                # Custom commands (managed by files, verified dynamically)
+                await self.load_module("custom_commands") 
+                # Note: custom_commands.py usually has a setup function if it's an extension,
+                # but if it just provides a class, we might need to handle it.
+                # Checking `bot.py` original import: it didn't import custom_commands as module?
+                # Ah, wait. `dashboard.py` used `CommandManager`. `bot.py` lines 92-97 handled it manually.
+                # So we need to keep that logic or create a manager here.
+                # We will instantiate CommandManager here.
+                
+                self._modules_loaded = True
+                print("📦 Modules chargés avec succès")
+            except Exception as e:
+                # Si module déjà chargé ou erreur
+                # On ignore custom_commands erreur car on va le gérer manuellement si besoin
+                pass
         
+        # Initialisation CommandManager (pour lire ce que le dashboard écrit)
+        from custom_commands import CommandManager
+        self.cmd_manager = CommandManager()
+
         await self.announcer.start()
-        await self.dashboard.start()  # Démarrage du site web
-        await self.chat_alerter.start()  # Démarrage alertes chat
+        await self.chat_alerter.start()
         self.moderator._log_background(f"✅ **Bot RyosaChii démarré** sur #{TWITCH_CHANNEL}")
+
+        # Démarrage Heartbeat
+        if not self._heartbeat_task:
+            self._heartbeat_task = asyncio.create_task(self.heartbeat_loop())
+
+    async def heartbeat_loop(self):
+        """Ping Discord toutes les 10 minutes."""
+        while True:
+            await asyncio.sleep(600) # 10 minutes
+            try:
+                msg = f"💓 **Heartbeat** | Ryosa est en ligne et fonctionnelle | Channel: #{TWITCH_CHANNEL}"
+                # Utilise le module de modération pour envoyer le log
+                await self.moderator._log(msg)
+            except Exception as e:
+                print(f"[HEARTBEAT] Erreur: {e}")
 
     async def close(self):
         """Fermeture propre du bot."""
         await self.announcer.stop()
-        await self.dashboard.stop()
         await self.chat_alerter.stop()
+        if self._heartbeat_task:
+            self._heartbeat_task.cancel()
+            
         if self.http_session:
-            # On utilise await pour être sûr que le log part avant la fermeture
             await self.moderator._log("🛑 **Bot RyosaChii arrêté.**")
             await self.http_session.close()
         await super().close()

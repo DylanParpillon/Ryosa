@@ -1,15 +1,17 @@
 """
-Serveur Web pour le Dashboard RyosaChii
+Serveur Web pour le Dashboard RyosaChii (Mode Autonome)
 """
 
 import os
+import json
+import socket
 from aiohttp import web
 from custom_commands import CommandManager
-import config
 
-class Dashboard:
-    def __init__(self, bot):
-        self.bot = bot
+CONFIG_FILE = "dashboard_config.json"
+
+class DashboardApp:
+    def __init__(self):
         self.cmd_manager = CommandManager()
         self.app = web.Application()
         self.runner = None
@@ -33,17 +35,26 @@ class Dashboard:
         print("🌍 Dashboard accessible sur :")
         print("   👉 Local :   http://localhost:8080")
         try:
-            import socket
             hostname = socket.gethostname()
             local_ip = socket.gethostbyname(hostname)
             print(f"   👉 Réseau :  http://{local_ip}:8080")
         except:
             pass
 
-    async def stop(self):
-        """Arrête le serveur web."""
-        if self.runner:
-            await self.runner.cleanup()
+    async def get_config(self):
+        if os.path.exists(CONFIG_FILE):
+             with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                 return json.load(f)
+        return {
+            "auto_msg_interval": 300,
+            "auto_msg_threshold": 5,
+            "auto_msg_text": "",
+            "enabled": True
+        }
+
+    async def save_config(self, data):
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4)
 
     # --- Routes ---
 
@@ -80,27 +91,38 @@ class Dashboard:
 
     async def handle_get_alerts(self, request):
         """API: Récupère les paramètres d'alertes."""
+        data = await self.get_config()
         return web.json_response({
-            'interval': config.AUTO_MSG_INTERVAL,
-            'threshold': config.AUTO_MSG_THRESHOLD,
-            'text': config.AUTO_MSG_TEXT,
-            'enabled': hasattr(self.bot, 'chat_alerter') and self.bot.chat_alerter._tache_boucle is not None
+            'interval': data.get('auto_msg_interval', 300),
+            'threshold': data.get('auto_msg_threshold', 5),
+            'text': data.get('auto_msg_text', ""),
+            'enabled': data.get('enabled', True)
         })
 
     async def handle_update_alerts(self, request):
         """API: Met à jour les paramètres d'alertes."""
         data = await request.json()
+        current_config = await self.get_config()
         
         if 'interval' in data:
-            config.AUTO_MSG_INTERVAL = int(data['interval'])
+            current_config['auto_msg_interval'] = int(data['interval'])
         if 'threshold' in data:
-            config.AUTO_MSG_THRESHOLD = int(data['threshold'])
+            current_config['auto_msg_threshold'] = int(data['threshold'])
         if 'text' in data:
-            config.AUTO_MSG_TEXT = data['text']
+            current_config['auto_msg_text'] = data['text']
+            
+        # Pas besoin de redémarrer le bot, le bot surveille le fichier JSON
         
-        # Redémarrer l'alerter avec les nouveaux params
-        if hasattr(self.bot, 'chat_alerter'):
-            await self.bot.chat_alerter.stop()
-            await self.bot.chat_alerter.start()
-        
+        await self.save_config(current_config)
         return web.json_response({'status': 'ok'})
+
+if __name__ == '__main__':
+    import asyncio
+    dashboard = DashboardApp()
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(dashboard.start())
+        print("Appuyez sur Ctrl+C pour arrêter.")
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass

@@ -83,7 +83,7 @@ LINK_REGEX = re.compile(
     r"(?:" + "|".join(COMMON_TLDS) + r")(?:/[^\s]*)?\b",
     re.IGNORECASE
 )
-
+    
 # Domaines autorisés (décommenter pour activer)
 LINK_WHITELIST = [
     # r"twitch\.tv/lacabanevirtuelle",
@@ -134,6 +134,6 @@ WARNING_LEVELS = [
 #                          AUTO MESSAGES (CHAT)
 # ══════════════════════════════════════════════════════════════════════════════
 
-AUTO_MSG_INTERVAL = 300  # 5 minutes en secondes
-AUTO_MSG_THRESHOLD = 5   # Nombre de messages min. entre deux alertes
+AUTO_MSG_INTERVAL = 600  # 10 minutes en secondes
+AUTO_MSG_THRESHOLD = 10   # Nombre de messages min. entre deux alertes
 AUTO_MSG_TEXT = "📢 Rejoignez notre Discord : https://discord.gg/WjBfgXmEdU !\n\n📢 Le planning, les actus et si tu veux trouver des mates tout est dessus !!!"

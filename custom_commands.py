@@ -55,6 +55,16 @@ class CommandManager:
 
     def get_response(self, message_content: str) -> str | None:
         """Cherche si le message correspond à une commande."""
+        # Check if file changed
+        if os.path.exists(COMMANDS_FILE):
+            try:
+                mtime = os.path.getmtime(COMMANDS_FILE)
+                if not hasattr(self, '_last_mtime') or mtime > self._last_mtime:
+                    self.load()
+                    self._last_mtime = mtime
+            except Exception:
+                pass
+
         cmd = message_content.split()[0].lower()
         return self.commands.get(cmd)
 
