@@ -1,13 +1,11 @@
-"""
-Module d'annonces Discord pour les streams
-Copyright (c) 2024 Tosachii et LaCabaneVirtuelle
-"""
-
+import json
+import os
 import asyncio
 import time
 from config import (
     TWITCH_CHANNEL, DISCORD_ANNOUNCE_URL, DISCORD_ROLE_ID,
-    POLL_INTERVAL_S, ANNOUNCE_MESSAGES, MENTION_MESSAGES
+    POLL_INTERVAL_S, ANNOUNCE_MESSAGES, MENTION_MESSAGES,
+    DISCORD_ANNOUNCE_COOLDOWN_S, ANNOUNCE_STATE_FILE
 )
 from utils import detect_streamer, clean_title
 
@@ -19,6 +17,7 @@ class StreamAnnouncer:
         self.bot = bot
         self._etait_en_live = False
         self._tache_surveillance = None
+        self._last_announce_time = self._load_last_announce_time()
 
     async def start(self):
         """Démarre la surveillance du stream."""
@@ -34,6 +33,25 @@ class StreamAnnouncer:
                 await self._tache_surveillance
             except asyncio.CancelledError:
                 pass
+
+    def _load_last_announce_time(self):
+        """Charge le timestamp de la dernière annonce depuis un fichier."""
+        if os.path.exists(ANNOUNCE_STATE_FILE):
+            try:
+                with open(ANNOUNCE_STATE_FILE, "r") as f:
+                    data = json.load(f)
+                    return data.get("last_announce_time", 0)
+            except Exception as e:
+                print(f"[ANNOUNCE] Erreur lecture état: {e}")
+        return 0
+
+    def _save_last_announce_time(self, timestamp):
+        """Sauvegarde le timestamp de la dernière annonce."""
+        try:
+            with open(ANNOUNCE_STATE_FILE, "w") as f:
+                json.dump({"last_announce_time": timestamp}, f)
+        except Exception as e:
+            print(f"[ANNOUNCE] Erreur sauvegarde état: {e}")
 
     async def _boucle_surveillance(self):
         """Boucle de vérification du statut du stream."""
@@ -59,6 +77,13 @@ class StreamAnnouncer:
         
         # Nouveau stream détecté
         if est_en_live and not self._etait_en_live:
+            # Vérification du cooldown
+            now = time.time()
+            if now - self._last_announce_time < DISCORD_ANNOUNCE_COOLDOWN_S:
+                print(f"[LIVE] ⏳ Stream en cours, mais annonce ignorée (Cooldown actif). Prochaine annonce possible dans {int((DISCORD_ANNOUNCE_COOLDOWN_S - (now - self._last_announce_time)) / 60)} min.")
+                self._etait_en_live = True
+                return
+
             stream = streams[0]
             titre = stream.title or "Sans titre"
             categorie = stream.game_name or "Aucune catégorie"
@@ -119,7 +144,11 @@ class StreamAnnouncer:
             }
             
             await self._envoyer_annonce_riche(mention, embed)
+            
+            # Mise à jour de l'état
             self._etait_en_live = True
+            self._last_announce_time = now
+            self._save_last_announce_time(now)
         
         # Stream terminé
         elif not est_en_live and self._etait_en_live:

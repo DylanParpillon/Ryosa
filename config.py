@@ -48,6 +48,8 @@ DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")          # ID Client Discord
 
 STREAM_URL = "https://www.twitch.tv/lacabanevirtuelle"
 POLL_INTERVAL_S = 60  # Vérifie toutes les 60 secondes
+DISCORD_ANNOUNCE_COOLDOWN_S = 2 * 60 * 60 + 30 * 60  # 2h30 en secondes
+ANNOUNCE_STATE_FILE = "announce_state.json"
 
 # 👇 MODIFIE TES MESSAGES ICI 👇
 # Variables : {title} = titre du stream, {category} = catégorie Twitch

@@ -159,7 +159,16 @@ class Bot(commands.Bot):
             clip = await broadcaster.create_clip(token=self._http.token)
             
             # 3. Réponse Chat
-            clip_url = f"https://clips.twitch.tv/{clip.id}"
+            # create_clip peut retourner un dict ou un objet selon la version
+            if isinstance(clip, dict):
+                clip_id = clip.get('id')
+                clip_url = clip.get('edit_url') # Souvent l'url d'édition, mais on peut construire l'url publique
+                if not clip_url:
+                     clip_url = f"https://clips.twitch.tv/{clip_id}"
+            else:
+                clip_id = clip.id
+                clip_url = f"https://clips.twitch.tv/{clip.id}"
+                
             await ctx.send(f"🎬 Clip créé par @{ctx.author.name} ! lien : {clip_url}")
             
             # 4. Log Discord
