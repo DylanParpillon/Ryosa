@@ -7,7 +7,7 @@ import asyncio
 import time
 from config import (
     TWITCH_CHANNEL, DISCORD_ANNOUNCE_URL, DISCORD_ROLE_ID,
-    POLL_INTERVAL_S, ANNOUNCE_MESSAGES
+    POLL_INTERVAL_S, ANNOUNCE_MESSAGES, MENTION_MESSAGES
 )
 from utils import detect_streamer, clean_title
 
@@ -99,7 +99,10 @@ class StreamAnnouncer:
             
             # Mention du rôle + Petit message
             role_ping = f"<@&{DISCORD_ROLE_ID}>" if DISCORD_ROLE_ID else "@everyone"
-            mention = f"Coucou {role_ping} ! ✨ Tosachii démarre son stream ! Préparez vos snacks et venez nous rejoindre, ça va être chouette ! 🌸"
+            
+            # Selection du message de mention selon le streamer
+            mention_template = MENTION_MESSAGES.get(streamer, MENTION_MESSAGES["DEFAULT"])
+            mention = mention_template.format(role=role_ping)
             
             # On prépare l'Embed (le joli encadré)
             embed = {

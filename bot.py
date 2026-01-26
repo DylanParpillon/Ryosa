@@ -155,8 +155,8 @@ class Bot(commands.Bot):
             broadcaster = users[0]
             
             # 2. Créer le clip
-            # Correction: Passage du token en argument nommé (TwitchIO 2.10)
-            clip = await broadcaster.create_clip(token=TWITCH_TOKEN)
+            # Utilisation du token dynamique du bot (qui se refresh auto)
+            clip = await broadcaster.create_clip(token=self._http.token)
             
             # 3. Réponse Chat
             clip_url = f"https://clips.twitch.tv/{clip.id}"

@@ -58,6 +58,14 @@ ANNOUNCE_MESSAGES = {
     "DEFAULT":   "🎮 On est en live !\n\nCatégorie: **{category}**\nTitre: {title}\n\n👉 " + STREAM_URL,
 }
 
+# Messages de mention Discord (le petit texte avant l'embed)
+MENTION_MESSAGES = {
+    "TOSA&ICHI": "Coucou {role} ! ✨ Tosachii & Ichiro démarrent leur stream ! Préparez vos snacks et venez nous rejoindre, ça va être chouette ! 🌸",
+    "TOSA":      "Coucou {role} ! ✨ Tosachii démarre son stream ! Préparez vos snacks et venez nous rejoindre, ça va être chouette ! 🌸",
+    "ICHI":      "Salut {role} ! 🔥 Ichiro prend les commandes du stream ! Venez vibrer avec nous, ça va chauffer ! ⚡",
+    "DEFAULT":   "Coucou {role} ! ✨ C'est parti pour le stream ! Préparez vos snacks et venez nous rejoindre ! 🌸",
+}
+
 # Regex pour détecter les tags de streamer
 STREAMER_TAG_REGEX = re.compile(r'\[(?:TOSA&ICHI|ICHI&TOSA|TOSA|ICHI)\]\s*', re.IGNORECASE)
 
