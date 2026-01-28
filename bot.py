@@ -85,11 +85,11 @@ class Bot(commands.Bot):
             self._heartbeat_task = asyncio.create_task(self.heartbeat_loop())
 
     async def heartbeat_loop(self):
-        """Ping Discord toutes les 10 minutes."""
+        """Envoie /bump sur Discord toutes les 120 minutes."""
         while True:
-            await asyncio.sleep(600) # 10 minutes
+            await asyncio.sleep(7200) # 120 minutes
             try:
-                msg = f"💓 **Heartbeat** | Ryosa est en ligne et fonctionnelle | Channel: #{TWITCH_CHANNEL}"
+                msg = "/bump"
                 # Utilise le module de modération pour envoyer le log
                 await self.moderator._log(msg)
             except Exception as e:
